@@ -37,6 +37,8 @@ print("Attente de connexion sur:", HOST_IP, "port:", HOST_PORT, "...")
 connecxion_socket, adresse_client = s.accept()    # fonction bloquante
 print("Connexion établie avec", adresse_client)
 
+s.close()
+
 
 
 
