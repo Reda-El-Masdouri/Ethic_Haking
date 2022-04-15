@@ -26,11 +26,15 @@ while 1:
         print("Connecté au serveur")
         break
 
-recieve_data = s.recv(MAX_DATA_SIZE)   # la fonction recv possède un paramètre = la taille max des données reçues
-if recieve_data:
-    print(recieve_data.decode())       # les données reçues sont en binaire on les décode pour obtenir une chaine de caractères
-else:
-    print("Aucune data")
+while 1:
+    recieve_data = s.recv(MAX_DATA_SIZE)   # la fonction recv possède un paramètre = la taille max des données reçues
+    print("server: ", recieve_data.decode())
+    data_to_send_to_server = input('Vous: ')
+    s.sendall(data_to_send_to_server.encode())
+#    if recieve_data:
+#        print(recieve_data.decode())       # les données reçues sont en binaire on les décode pour obtenir une chaine de caractères
+#    else:
+#        print("Aucune data")
 
 s.close()
 

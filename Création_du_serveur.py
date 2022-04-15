@@ -25,9 +25,10 @@
 
 # --------------------- I) Sockets:   Script serveur ------------------
 import socket
+import time
 HOST_IP = "127.0.0.1"
 HOST_PORT = 32000
-
+MAX_DATA_SIZE = 1024
 
 s = socket.socket()
 s.bind((HOST_IP, HOST_PORT))                     # la fonction bind prend un seul paramètre (ip, port)
@@ -37,9 +38,14 @@ print("Attente de connexion sur:", HOST_IP, "port:", HOST_PORT, "...")
 connecxion_socket, adresse_client = s.accept()    # fonction bloquante
 print("Connexion établie avec", adresse_client)
 
-txt_to_send = "Bonjour"
-connecxion_socket.sendall(txt_to_send.encode())   # la fonction send envoie des données en binaire c'est la raison de ".encode"
-
+while 1:
+    txt_to_send = input("Vous: ")
+    connecxion_socket.sendall(txt_to_send.encode())   # la fonction send envoie des données en binaire c'est la raison de ".encode"
+    recieved_data_from_client = connecxion_socket.recv(MAX_DATA_SIZE)
+    if recieved_data_from_client:
+        print("client:", recieved_data_from_client.decode())
+    else:
+        break
 s.close()
 connecxion_socket.close()
 
