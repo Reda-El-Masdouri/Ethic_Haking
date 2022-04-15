@@ -37,8 +37,11 @@ print("Attente de connexion sur:", HOST_IP, "port:", HOST_PORT, "...")
 connecxion_socket, adresse_client = s.accept()    # fonction bloquante
 print("Connexion établie avec", adresse_client)
 
-s.close()
+txt_to_send = "Bonjour"
+connecxion_socket.sendall(txt_to_send.encode())   # la fonction send envoie des données en binaire c'est la raison de ".encode"
 
+s.close()
+connecxion_socket.close()
 
 
 
