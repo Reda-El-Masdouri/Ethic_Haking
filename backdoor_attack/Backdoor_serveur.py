@@ -14,12 +14,15 @@ print("Connexion établie avec", adresse_client)
 
 while 1:
     commande = input("Commande: ")
-    connecxion_socket.sendall(commande.encode())   
-    recieved_data_from_client = connecxion_socket.recv(MAX_DATA_SIZE)
-    if recieved_data_from_client:
-        print(recieved_data_from_client.decode())
+    if commande == "":
+        print("vous avez entrez une commande vide")
     else:
-        break
+        connecxion_socket.sendall(commande.encode())   
+        recieved_data_from_client = connecxion_socket.recv(MAX_DATA_SIZE)
+        if recieved_data_from_client:
+            print(recieved_data_from_client.decode())
+        else:
+            break
 s.close()
 connecxion_socket.close()
 
