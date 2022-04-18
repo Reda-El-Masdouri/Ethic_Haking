@@ -7,7 +7,7 @@ HOST_IP = "127.0.0.1"
 HOST_PORT = 32000
 MAX_DATA_SIZE = 1024
 
-def socket_recieve_all_data(socket_p, data_len):
+def socket_recieve_all_data(socket_p, data_len: int):
     current_data_len = 0
     total_data = None
     print("socket_recieve_all_data_len", data_len)
@@ -27,6 +27,17 @@ def socket_recieve_all_data(socket_p, data_len):
         print("  total len:", current_data_len,"/", data_len)  
     return total_data
 
+def socket_send_command_and_recieve_all_data(socket_p, command):
+    if not command:
+        return None
+    socket_p.sendall(command.encode())
+
+    header_data = socket_recieve_all_data(socket_p, 13)
+    len_data = int(header_data.decode())  
+
+    recieved_data_from_client = socket_recieve_all_data(socket_p, len_data)
+    return recieved_data_from_client
+
 s = socket.socket()
 s.bind((HOST_IP, HOST_PORT))                     
 s.listen()                                       
@@ -35,20 +46,15 @@ connecxion_socket, adresse_client = s.accept()
 print("Connexion établie avec", adresse_client)
 
 while 1:
-    commande = input("Commande: ")
-    if commande == "":
-        continue
-    connecxion_socket.sendall(commande.encode())
-
-    header_data = socket_recieve_all_data(connecxion_socket, 13)
-    len_data = int(header_data.decode())  
-
-    recieved_data_from_client = socket_recieve_all_data(connecxion_socket, len_data)
-    print("len_data:", len_data)
-    if recieved_data_from_client:
-        print(recieved_data_from_client.decode())
-    else:
+    info_data = socket_send_command_and_recieve_all_data(connecxion_socket, "infos")
+    if not info_data:
         break
+    commande = input(info_data.decode() + " > ")
+    recieve_data = socket_recieve_all_data(connecxion_socket, commande)
+    if not recieve_data:
+        break
+    print(recieve_data.decode())
+    
 s.close()
 connecxion_socket.close()
 
