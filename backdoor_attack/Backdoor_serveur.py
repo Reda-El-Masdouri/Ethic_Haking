@@ -1,62 +1,66 @@
 
 import socket
-from this import d
 import time
-from tkinter.messagebox import NO
+
 HOST_IP = "127.0.0.1"
 HOST_PORT = 32000
 MAX_DATA_SIZE = 1024
 
-def socket_recieve_all_data(socket_p, data_len: int):
+def socket_receive_all_data(socket_p, data_len):
     current_data_len = 0
     total_data = None
-    print("socket_recieve_all_data_len", data_len)
+    # print("socket_receive_all_data len:", data_len)
     while current_data_len < data_len:
         chunk_len = data_len - current_data_len
         if chunk_len > MAX_DATA_SIZE:
             chunk_len = MAX_DATA_SIZE
         data = socket_p.recv(chunk_len)
-        print("  len:", len(data))
+        # print("  len:", len(data))
         if not data:
             return None
         if not total_data:
             total_data = data
         else:
             total_data += data
-        current_data_len += len(data)  
-        print("  total len:", current_data_len,"/", data_len)  
+        current_data_len += len(data)
+        # print("  total len:", current_data_len, "/", data_len)
     return total_data
 
-def socket_send_command_and_recieve_all_data(socket_p, command):
-    if not command:
+def socket_send_command_and_receive_all_data(socket_p, command):
+    if not command:  # if command == ""
         return None
     socket_p.sendall(command.encode())
 
-    header_data = socket_recieve_all_data(socket_p, 13)
-    len_data = int(header_data.decode())  
+    header_data = socket_receive_all_data(socket_p, 13)
+    longeur_data = int(header_data.decode())
 
-    recieved_data_from_client = socket_recieve_all_data(socket_p, len_data)
-    return recieved_data_from_client
+    data_recues = socket_receive_all_data(socket_p, longeur_data)
+    return data_recues
+
 
 s = socket.socket()
-s.bind((HOST_IP, HOST_PORT))                     
-s.listen()                                       
-print("Attente de connexion sur:", HOST_IP, "port:", HOST_PORT, "...")
-connecxion_socket, adresse_client = s.accept()    
-print("Connexion établie avec", adresse_client)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind((HOST_IP, HOST_PORT))
+s.listen()
 
-while 1:
-    info_data = socket_send_command_and_recieve_all_data(connecxion_socket, "infos")
-    if not info_data:
+print(f"Attente de connexion sur {HOST_IP}, port {HOST_PORT}...")
+connection_socket, client_address = s.accept()
+print(f"Connexion établie avec {client_address}")
+
+while True:
+    # ... infos
+    infos_data = socket_send_command_and_receive_all_data(connection_socket, "infos")
+    if not infos_data:
         break
-    commande = input(info_data.decode() + " > ")
-    recieve_data = socket_recieve_all_data(connecxion_socket, commande)
-    if not recieve_data:
+    commande = input(client_address[0]+":"+str(client_address[1])+ " " + infos_data.decode() + " > ")
+
+    data_recues = socket_send_command_and_receive_all_data(connection_socket, commande)
+    if not data_recues:
         break
-    print(recieve_data.decode())
-    
+    print(data_recues.decode())
+
 s.close()
-connecxion_socket.close()
+connection_socket.close()
 
 
 
