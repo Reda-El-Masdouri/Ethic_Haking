@@ -1,4 +1,5 @@
 
+from fileinput import filename
 import socket
 import time
 
@@ -47,17 +48,31 @@ print(f"Attente de connexion sur {HOST_IP}, port {HOST_PORT}...")
 connection_socket, client_address = s.accept()
 print(f"Connexion établie avec {client_address}")
 
+dl_filename = None
 while True:
     # ... infos
     infos_data = socket_send_command_and_receive_all_data(connection_socket, "infos")
     if not infos_data:
         break
     commande = input(client_address[0]+":"+str(client_address[1])+ " " + infos_data.decode() + " > ")
-
+    commande_split = commande.split(" ")
+    if len(commande_split) == 2 and commande_split[0] == 'dl':
+        dl_filename = commande_split[1]
     data_recues = socket_send_command_and_receive_all_data(connection_socket, commande)
     if not data_recues:
         break
-    print(data_recues.decode())
+
+    if dl_filename:
+        if len(data_recues) == 1 and data_recues == b" ":
+            print("ERREUR: le fichier", dl_filename, "n'existe pas")
+        else:
+            f = open(dl_filename, "wb")
+            f.write(data_recues)
+            f.close()
+            print("Fichier", filename, "téléchargé.")
+        dl_filename = None
+    else:
+        print(data_recues.decode())
 
 s.close()
 connection_socket.close()
